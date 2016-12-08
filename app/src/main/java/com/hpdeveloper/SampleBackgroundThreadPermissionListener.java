@@ -3,10 +3,10 @@ package com.hpdeveloper;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.hpdeveloper.listener.OnPermissionListener;
 import com.hpdeveloper.listener.PermissionDeniedResponse;
 import com.hpdeveloper.listener.PermissionGrantedResponse;
 import com.hpdeveloper.listener.PermissionRequest;
-import com.permissionapp.MainActivity;
 
 /**
  * Sample listener that shows how to handle permission request callbacks on a background thread
@@ -15,8 +15,8 @@ public class SampleBackgroundThreadPermissionListener extends SamplePermissionLi
 
   private Handler handler = new Handler(Looper.getMainLooper());
 
-  public SampleBackgroundThreadPermissionListener(MainActivity activity) {
-    super(activity);
+  public SampleBackgroundThreadPermissionListener(OnPermissionListener onPermissionListener) {
+    super(onPermissionListener);
   }
 
   @Override

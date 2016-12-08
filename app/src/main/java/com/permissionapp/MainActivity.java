@@ -1,13 +1,10 @@
 package com.permissionapp;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +17,7 @@ import com.hpdeveloper.PermissionToken;
 import com.hpdeveloper.PermissionUtils;
 import com.hpdeveloper.SampleMultiplePermissionListener;
 import com.hpdeveloper.SamplePermissionListener;
+import com.hpdeveloper.listener.OnPermissionListener;
 import com.hpdeveloper.listener.PermissionRequest;
 import com.hpdeveloper.listener.multi.CompositeMultiplePermissionsListener;
 import com.hpdeveloper.listener.multi.MultiplePermissionsListener;
@@ -31,8 +29,7 @@ import com.hpdeveloper.listener.single.SnackbarOnDeniedPermissionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
-
+public class MainActivity extends BaseActivity implements OnPermissionListener{
 
     private MultiplePermissionsListener allPermissionsListener;
     private PermissionListener contactsPermissionListener;
@@ -95,33 +92,6 @@ public class MainActivity extends AppCompatActivity {
         clickedButton = (String) button.getTag();
     }
 
-    public void showPermissionGranted(List<String> permissions) {
-        if(permissions!=null&&!permissions.isEmpty()){
-            if(clickedButton.equals("")){
-                String allGrantedPermissnions = TextUtils.join(",", permissions);
-                Toast.makeText(MainActivity.this, "Granted: "+allGrantedPermissnions, Toast.LENGTH_SHORT).show();
-            }else if(containsString(permissions, clickedButton)){
-                Toast.makeText(MainActivity.this, "Granted: "+clickedButton, Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    public void showPermissionDenied(List<DeniedPermissionEntity> permissions) {
-        if(permissions!=null&&!permissions.isEmpty()){
-            if(clickedButton.equals("")){
-                List<String> list = new ArrayList<>();
-                for (DeniedPermissionEntity deniedPermissionEntity : permissions){
-                    list.add(deniedPermissionEntity.permissionName);
-                }
-                String allDeniedPermissnions = TextUtils.join(",", list);
-                Toast.makeText(MainActivity.this, "Denied: " + allDeniedPermissnions, Toast.LENGTH_SHORT).show();
-            }else if(contains(permissions, clickedButton)){
-                Toast.makeText(MainActivity.this, "Denied: "+clickedButton, Toast.LENGTH_SHORT).show();
-            }
-
-        }
-
-    }
 
     private boolean containsString(List<String> list, String value){
         for (String string : list){
@@ -145,48 +115,13 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public void showPermissionRationale(final List<PermissionRequest> permissions, final PermissionToken token) {
-
-        StringBuilder message = new StringBuilder();
-        for (PermissionRequest permissionRequest : permissions){
-            message.append(PermissionUtils.getPermissionDetails(permissionRequest.getName()));
-            message.append(",\n");
-        }
-
-        new AlertDialog.Builder(this).setTitle(R.string.permission_rationale_title)
-                .setMessage(message.toString())
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        token.cancelPermissionRequest();
-                    }
-                })
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        token.continuePermissionRequest();
-                    }
-                })
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        token.cancelPermissionRequest();
-                    }
-                })
-                .show();
-    }
-
     private void createPermissionListeners() {
 
         // Add all permission in hashmap to find description
         PermissionUtils.addPermissionMap(MainActivity.this);
 
         PermissionListener feedbackViewPermissionListener = new SamplePermissionListener(this);
-        MultiplePermissionsListener feedbackViewMultiplePermissionListener =
-                new SampleMultiplePermissionListener(this);
+        MultiplePermissionsListener feedbackViewMultiplePermissionListener = new SampleMultiplePermissionListener(this);
 
         allPermissionsListener =
                 new CompositeMultiplePermissionsListener(feedbackViewMultiplePermissionListener,
@@ -246,5 +181,66 @@ public class MainActivity extends AppCompatActivity {
                         })
                         .build());
 
+    }
+
+    @Override
+    public void onPermissionGranted(List<String> permissions) {
+        if(permissions!=null&&!permissions.isEmpty()){
+            if(clickedButton.equals("")){
+                String allGrantedPermissnions = TextUtils.join(",", permissions);
+                Toast.makeText(MainActivity.this, "Granted: "+allGrantedPermissnions, Toast.LENGTH_SHORT).show();
+            }else if(containsString(permissions, clickedButton)){
+                Toast.makeText(MainActivity.this, "Granted: "+clickedButton, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onPermissionDenied(List<DeniedPermissionEntity> permissions) {
+        if(permissions!=null&&!permissions.isEmpty()){
+            if(clickedButton.equals("")){
+                List<String> list = new ArrayList<>();
+                for (DeniedPermissionEntity deniedPermissionEntity : permissions){
+                    list.add(deniedPermissionEntity.permissionName);
+                }
+                String allDeniedPermissnions = TextUtils.join(",", list);
+                Toast.makeText(MainActivity.this, "Denied: " + allDeniedPermissnions, Toast.LENGTH_SHORT).show();
+            }else if(contains(permissions, clickedButton)){
+                Toast.makeText(MainActivity.this, "Denied: "+clickedButton, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onPermissionRational(List<PermissionRequest> permissions, final PermissionToken token) {
+        StringBuilder message = new StringBuilder();
+        for (PermissionRequest permissionRequest : permissions){
+            message.append(PermissionUtils.getPermissionDetails(permissionRequest.getName()));
+            message.append(",\n");
+        }
+
+        new AlertDialog.Builder(this).setTitle(R.string.permission_rationale_title)
+                .setMessage(message.toString())
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        token.cancelPermissionRequest();
+                    }
+                })
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        token.continuePermissionRequest();
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        token.cancelPermissionRequest();
+                    }
+                })
+                .show();
     }
 }

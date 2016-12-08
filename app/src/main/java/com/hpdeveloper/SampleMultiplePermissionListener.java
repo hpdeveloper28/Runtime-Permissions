@@ -1,21 +1,21 @@
 
 package com.hpdeveloper;
 
+import com.hpdeveloper.listener.OnPermissionListener;
 import com.hpdeveloper.listener.PermissionDeniedResponse;
 import com.hpdeveloper.listener.PermissionGrantedResponse;
 import com.hpdeveloper.listener.PermissionRequest;
 import com.hpdeveloper.listener.multi.MultiplePermissionsListener;
-import com.permissionapp.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SampleMultiplePermissionListener implements MultiplePermissionsListener {
 
-    private final MainActivity activity;
+    private OnPermissionListener onPermissionListener;
 
-    public SampleMultiplePermissionListener(MainActivity activity) {
-        this.activity = activity;
+    public SampleMultiplePermissionListener(OnPermissionListener listener) {
+        this.onPermissionListener = listener;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class SampleMultiplePermissionListener implements MultiplePermissionsList
         for (PermissionGrantedResponse response : report.getGrantedPermissionResponses()) {
             grantedPermissions.add(response.getPermissionName());
         }
-        activity.showPermissionGranted(grantedPermissions);
+        onPermissionListener.onPermissionGranted(grantedPermissions);
 
         for (PermissionDeniedResponse response : report.getDeniedPermissionResponses()) {
             DeniedPermissionEntity deniedPermissionEntity = new DeniedPermissionEntity();
@@ -34,12 +34,12 @@ public class SampleMultiplePermissionListener implements MultiplePermissionsList
             deniedPermissions.add(deniedPermissionEntity);
         }
 
-        activity.showPermissionDenied(deniedPermissions);
+        onPermissionListener.onPermissionDenied(deniedPermissions);
     }
 
     @Override
     public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions,
                                                    PermissionToken token) {
-        activity.showPermissionRationale(permissions, token);
+        onPermissionListener.onPermissionRational(permissions, token);
     }
 }

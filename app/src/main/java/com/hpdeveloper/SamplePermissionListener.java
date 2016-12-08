@@ -1,21 +1,21 @@
 
 package com.hpdeveloper;
 
+import com.hpdeveloper.listener.OnPermissionListener;
 import com.hpdeveloper.listener.PermissionDeniedResponse;
 import com.hpdeveloper.listener.PermissionGrantedResponse;
 import com.hpdeveloper.listener.PermissionRequest;
 import com.hpdeveloper.listener.single.PermissionListener;
-import com.permissionapp.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SamplePermissionListener implements PermissionListener {
 
-  private final MainActivity activity;
+  private OnPermissionListener onPermissionListener;
 
-  public SamplePermissionListener(MainActivity activity) {
-    this.activity = activity;
+  public SamplePermissionListener(OnPermissionListener listener) {
+    this.onPermissionListener = listener;
   }
 
   @Override
@@ -23,7 +23,7 @@ public class SamplePermissionListener implements PermissionListener {
     List<String> permissionRequests = new ArrayList<>();
     permissionRequests.add(response.getPermissionName());
 
-    activity.showPermissionGranted(permissionRequests);
+    onPermissionListener.onPermissionGranted(permissionRequests);
   }
 
   @Override
@@ -35,7 +35,7 @@ public class SamplePermissionListener implements PermissionListener {
     deniedPermissionEntity.isDeniedPermanent = response.isPermanentlyDenied();
     permissionRequests.add(deniedPermissionEntity);
 
-    activity.showPermissionDenied(permissionRequests);
+    onPermissionListener.onPermissionDenied(permissionRequests);
   }
 
   @Override
@@ -43,6 +43,6 @@ public class SamplePermissionListener implements PermissionListener {
       PermissionToken token) {
     List<PermissionRequest> permissionRequests = new ArrayList<>();
     permissionRequests.add(permission);
-    activity.showPermissionRationale(permissionRequests, token);
+    onPermissionListener.onPermissionRational(permissionRequests, token);
   }
 }
